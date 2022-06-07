@@ -87,7 +87,7 @@ class _UserInfoState extends State<UserInfo> {
                   value: 'male',
                   onChanged: (value) {
                     setState(() {
-                      widget.userinfomodel.gender = value;
+                      widget.userinfomodel.gender = value as String;
                     });
                   }),
               Radio(
@@ -95,7 +95,7 @@ class _UserInfoState extends State<UserInfo> {
                   value: 'female',
                   onChanged: (value) {
                     setState(() {
-                      widget.userinfomodel.gender = value;
+                      widget.userinfomodel.gender = value as String;
                     });
                   })
             ],

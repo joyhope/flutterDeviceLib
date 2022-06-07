@@ -12,7 +12,7 @@ class ScaleDataListItem extends StatefulWidget {
   final String title;
   final String value;
 
-  ScaleDataListItem({this.title, this.value});
+  ScaleDataListItem({required this.title, required this.value});
   @override
   _ScaleDataListItemState createState() => _ScaleDataListItemState();
 }

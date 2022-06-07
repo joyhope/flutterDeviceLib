@@ -99,7 +99,7 @@ class BleTool
         .then((result) => print('setScaleDataListener ${result.errorCode}'));
   }
 
-  void _setSdkConfig() async {
+  Future<void> _setSdkConfig() async {
     var config = QNConfig(
         allowDuplicates: true, iOSShowPowerAlertKey: true, unit: curUnit);
     qnApi.saveConfig(config);

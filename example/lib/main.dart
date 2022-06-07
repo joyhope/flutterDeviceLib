@@ -35,7 +35,7 @@ class _MyAppState extends State<MyApp> {
   var _buttonText = 'start scan';
   var _stateText = 'pending';
   var _userInfoWidget = UserInfo();
-  QNBleDevice _curDevice;
+  late QNBleDevice _curDevice;
 
   var _dataSource = <Map>[];
   var _deviceList = <QNBleDevice>[];
