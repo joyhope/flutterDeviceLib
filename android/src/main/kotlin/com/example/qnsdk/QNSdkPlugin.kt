@@ -17,6 +17,8 @@ import com.qn.device.out.QNBleDevice;
 import com.qn.device.listener.QNBleConnectionChangeListener
 import com.qn.device.listener.QNBleDeviceDiscoveryListener
 import com.qn.device.listener.QNScaleDataListener
+import com.qn.device.constant.QNDeviceType
+
 import com.qn.device.out.*
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.EventChannel
@@ -310,6 +312,21 @@ public class QNSdkPlugin : FlutterPlugin, MethodCallHandler, QNSdkApi, EventChan
         var mac: String = device!![ArgumentName.mac] as String
         var modeId: String = device!![ArgumentName.modeId] as String
         val qnBleDevice: QNBleDevice = qnBleApi.buildFlutterDevice(modeId, mac)
+        if (qnBleDevice.isSupportWifi()){
+            if (qnBleDevice.getDeviceType() == QNDeviceType.SCALE_BLE_DEFAULT) {
+                //普通双模秤
+            } else if (qnBleDevice.getDeviceType() == QNDeviceType.USER_SCALE) { // 支持wifi的用户秤，即wsp秤
+            } else if (qnBleDevice.getDeviceType() == QNDeviceType.HEIGHT_SCALE) { // 身高一体机
+            }
+        }else{
+            // SCALE_BROADCAST
+            if (qnBleDevice.getDeviceType() == QNDeviceType.SCALE_BROADCAST && !qnBleDevice.getOneToOne()) {
+            } else if (qnBleDevice.getDeviceType() == QNDeviceType.SCALE_KITCHEN) { // SCALE_KITCHEN
+            } else if (qnBleDevice.getDeviceType() == QNDeviceType.USER_SCALE) { // 不支持wifi的用户秤，目前有va秤
+            } else { //SCALE_BLE_DEFAULT
+            }
+        }
+
         var qnUser: QNUser = qnBleApi.buildUser(
                 user!![ArgumentName.userId] as String,
                 user!![ArgumentName.height] as Int,
