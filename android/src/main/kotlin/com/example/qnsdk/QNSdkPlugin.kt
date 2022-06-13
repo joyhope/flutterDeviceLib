@@ -17,6 +17,8 @@ import com.qn.device.out.QNBleDevice;
 import com.qn.device.listener.QNBleConnectionChangeListener
 import com.qn.device.listener.QNBleDeviceDiscoveryListener
 import com.qn.device.listener.QNScaleDataListener
+import com.qn.device.constant.QNDeviceType
+
 import com.qn.device.out.*
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.EventChannel
@@ -32,6 +34,7 @@ public class QNSdkPlugin : FlutterPlugin, MethodCallHandler, QNSdkApi, EventChan
 
 
     override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
+        deviceList = HashSet<QNBleDevice>()
         context = flutterPluginBinding.applicationContext
         qnBleApi = QNBleApi.getInstance(flutterPluginBinding.applicationContext)
         val channel = MethodChannel(flutterPluginBinding.getBinaryMessenger(), ArgumentName.channelName)
@@ -48,15 +51,17 @@ public class QNSdkPlugin : FlutterPlugin, MethodCallHandler, QNSdkApi, EventChan
         lateinit var context: Context
         lateinit var eventSink: EventChannel.EventSink
 
+        lateinit var deviceList: HashSet<QNBleDevice>
+
         @JvmStatic
         fun registerWith(registrar: Registrar) {
+            deviceList = HashSet<QNBleDevice>()
             context = registrar.context()
             qnBleApi = QNBleApi.getInstance(context)
             val channel = MethodChannel(registrar.messenger(), ArgumentName.channelName)
             channel.setMethodCallHandler(QNSdkPlugin())
             val eventChannel = EventChannel(registrar.messenger(), ArgumentName.eventName)
             eventChannel.setStreamHandler(QNSdkPlugin())
-
         }
     }
 
@@ -146,6 +151,9 @@ public class QNSdkPlugin : FlutterPlugin, MethodCallHandler, QNSdkApi, EventChan
     override fun setBleDeviceDiscoveryListener(result: Result) {
         qnBleApi.setBleDeviceDiscoveryListener(object : QNBleDeviceDiscoveryListener {
             override fun onDeviceDiscover(qnBleDevice: QNBleDevice?) {
+                if(qnBleDevice!=null) {
+                    deviceList.add(qnBleDevice);
+                }
                 eventSink?.let {
                     it.success(TransformerUtils.transFormerEventMap(EventName.onDeviceDiscover,
                             mapOf(ArgumentName.device to TransformerUtils.transQNBleDeviceMap(qnBleDevice))))
@@ -294,6 +302,7 @@ public class QNSdkPlugin : FlutterPlugin, MethodCallHandler, QNSdkApi, EventChan
     }
 
     override fun startBleDeviceDiscovery(result: Result) {
+        deviceList.clear();
         qnBleApi.startBleDeviceDiscovery { code, message ->
             result.success(TransformerUtils.transResultCallMap(code, message))
         }
@@ -309,7 +318,34 @@ public class QNSdkPlugin : FlutterPlugin, MethodCallHandler, QNSdkApi, EventChan
     override fun connectDevice(device: Map<String, Any>?, user: Map<String, Any>?, result: Result) {
         var mac: String = device!![ArgumentName.mac] as String
         var modeId: String = device!![ArgumentName.modeId] as String
-        val qnBleDevice: QNBleDevice = qnBleApi.buildFlutterDevice(modeId, mac)
+        var qnBleDevice: QNBleDevice? = findDevice(mac)
+        
+        if(qnBleDevice == null){
+            qnBleDevice = qnBleApi.buildFlutterDevice(modeId, mac)
+        }
+        //Log.i("CUSTOM","Device type = ${qnBleDevice!!.getDeviceType()}");
+        if (qnBleDevice!!.isSupportWifi()){
+            if (qnBleDevice!!.getDeviceType() == QNDeviceType.SCALE_BLE_DEFAULT) {
+                //普通双模秤
+                //Log.i("CUSTOM","wifi SCALE_BLE_DEFAULT");
+            } else if (qnBleDevice!!.getDeviceType() == QNDeviceType.USER_SCALE) { // 支持wifi的用户秤，即wsp秤
+                //Log.i("CUSTOM","USER_SCALE");
+            } else if (qnBleDevice!!.getDeviceType() == QNDeviceType.HEIGHT_SCALE) { // 身高一体机
+                //Log.i("CUSTOM","HEIGHT_SCALE");
+            }
+        }else{
+            // SCALE_BROADCAST
+            if (qnBleDevice!!.getDeviceType() == QNDeviceType.SCALE_BROADCAST && !qnBleDevice.getOneToOne()) {
+                //Log.i("CUSTOM","SCALE_BROADCAST");
+            } else if (qnBleDevice!!.getDeviceType() == QNDeviceType.SCALE_KITCHEN) { // SCALE_KITCHEN
+                //Log.i("CUSTOM","SCALE_KITCHEN");
+            } else if (qnBleDevice!!.getDeviceType() == QNDeviceType.USER_SCALE) { // 不支持wifi的用户秤，目前有va秤
+                //Log.i("CUSTOM","USER_SCALE");
+            } else { //SCALE_BLE_DEFAULT
+                //Log.i("CUSTOM","SCALE_BLE_DEFAULT ");
+            }
+        }
+
         var qnUser: QNUser = qnBleApi.buildUser(
                 user!![ArgumentName.userId] as String,
                 user!![ArgumentName.height] as Int,
@@ -324,7 +360,7 @@ public class QNSdkPlugin : FlutterPlugin, MethodCallHandler, QNSdkApi, EventChan
                 result.error(code.toString(), msg, "")
             }
         }
-        qnBleApi.connectDevice(qnBleDevice, qnUser) { code, msg ->
+        qnBleApi.connectDevice(qnBleDevice!!, qnUser) { code, msg ->
             result.success(TransformerUtils.transResultCallMap(code, msg))
         }
     }
@@ -400,4 +436,15 @@ public class QNSdkPlugin : FlutterPlugin, MethodCallHandler, QNSdkApi, EventChan
     }
 
 
+    fun findDevice( mac: String): QNBleDevice? {
+        for(obj in deviceList){
+             if (obj is QNBleDevice){
+                val scanResult: QNBleDevice = obj as QNBleDevice
+                if(scanResult.getMac() == mac){
+                    return obj;
+                }
+            }
+        }
+        return null;
+    }
 }
