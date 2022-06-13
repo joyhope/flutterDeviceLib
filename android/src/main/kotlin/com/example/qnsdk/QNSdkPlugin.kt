@@ -319,7 +319,6 @@ public class QNSdkPlugin : FlutterPlugin, MethodCallHandler, QNSdkApi, EventChan
         var mac: String = device!![ArgumentName.mac] as String
         var modeId: String = device!![ArgumentName.modeId] as String
         var qnBleDevice: QNBleDevice? = findDevice(mac)
-        
         if(qnBleDevice == null){
             qnBleDevice = qnBleApi.buildFlutterDevice(modeId, mac)
         }
@@ -343,6 +342,7 @@ public class QNSdkPlugin : FlutterPlugin, MethodCallHandler, QNSdkApi, EventChan
                 //Log.i("CUSTOM","USER_SCALE");
             } else { //SCALE_BLE_DEFAULT
                 //Log.i("CUSTOM","SCALE_BLE_DEFAULT ");
+            }
         }
 
         var qnUser: QNUser = qnBleApi.buildUser(
