@@ -343,7 +343,6 @@ public class QNSdkPlugin : FlutterPlugin, MethodCallHandler, QNSdkApi, EventChan
                 //Log.i("CUSTOM","USER_SCALE");
             } else { //SCALE_BLE_DEFAULT
                 //Log.i("CUSTOM","SCALE_BLE_DEFAULT ");
-            }
         }
 
         var qnUser: QNUser = qnBleApi.buildUser(
