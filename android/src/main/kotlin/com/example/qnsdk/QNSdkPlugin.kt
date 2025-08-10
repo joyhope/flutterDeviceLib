@@ -26,7 +26,7 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
-import io.flutter.plugin.common.PluginRegistry.Registrar
+//import io.flutter.plugin.common.PluginRegistry.Registrar
 import java.util.*
 
 
@@ -53,6 +53,7 @@ public class QNSdkPlugin : FlutterPlugin, MethodCallHandler, QNSdkApi, EventChan
 
         lateinit var deviceList: HashSet<QNBleDevice>
 
+        /*
         @JvmStatic
         fun registerWith(registrar: Registrar) {
             deviceList = HashSet<QNBleDevice>()
@@ -62,7 +63,7 @@ public class QNSdkPlugin : FlutterPlugin, MethodCallHandler, QNSdkApi, EventChan
             channel.setMethodCallHandler(QNSdkPlugin())
             val eventChannel = EventChannel(registrar.messenger(), ArgumentName.eventName)
             eventChannel.setStreamHandler(QNSdkPlugin())
-        }
+        }*/
     }
 
     override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
